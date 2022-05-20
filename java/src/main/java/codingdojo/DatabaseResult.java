@@ -6,11 +6,11 @@ import java.util.List;
 
 public class DatabaseResult {
     final Date timestamp;
-    final List<DatabaseItem> result;
+    final List<DatabaseItem> items;
 
-    public DatabaseResult(Date timestamp, List<DatabaseItem> result) {
+    public DatabaseResult(Date timestamp, List<DatabaseItem> items) {
         this.timestamp = timestamp;
-        this.result = result;
+        this.items = items;
     }
 
     static class DatabaseItem {
