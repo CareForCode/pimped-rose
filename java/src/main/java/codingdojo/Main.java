@@ -14,25 +14,26 @@ public class Main {
     public static void main(String[] argv) {
         Database.getItems()
             .map(Main::handleDatabaseResult)
-            .map(GildedRose::updateItems)
-            .map(Report::createReport)
+            .map(WithDate.lift(GildedRose::updateItems))
+            .map(WithDate.lift(Report::createReport))
             .subscribe(Main::writeReport);
     }
 
-    private static List<Item> handleDatabaseResult(DatabaseResult r) {
-        return r.result.stream()
-            .map(i -> new Item(
-                i.name,
-                Integer.valueOf(i.sellIn),
-                Integer.valueOf(i.quality)
-            )).collect(Collectors.toList());
+    private static WithDate<List<Item>> handleDatabaseResult(DatabaseResult r) {
+        List<Item> itemList = r.result.stream() //r besitzt einen timestamp --> dieser geht verloren
+                .map(i -> new Item(
+                        i.name,
+                        Integer.valueOf(i.sellIn),
+                        Integer.valueOf(i.quality)
+                )).collect(Collectors.toList());
+        return new WithDate<>(r.timestamp, itemList);
     }
 
-    private static void writeReport(Report report) {
+    private static void writeReport(WithDate<Report> report) {
         try {
-            String filename = "report.txt";
+            String filename = "report" + report.timestamp.getSeconds() + ".txt"; //hier soll filename landen
             Path path = Paths.get(filename);
-            String reportString = report.toString();
+            String reportString = report.value.toString();
             Files.write(path, reportString.getBytes());
         } catch (IOException e) {
             e.printStackTrace();
